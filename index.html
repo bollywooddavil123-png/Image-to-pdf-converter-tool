@@ -1,152 +1,66 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!DOCTYPE article>
-<article
-  xml:lang="en"
-  xmlns="http://docbook.org/ns/docbook" version="5.0"
-  xmlns:xlink="http://www.w3.org/1999/xlink" >
-  <info>
-    <title>Image to PDF Studio</title>
-  </info>
-  <para>
-    <emphasis></emphasis>
-  </para>
-  <section xml:id="pdf-craft">
-    <title>PDF Craft</title>
-    <para>
-      Professional Image to PDF Studio
-    </para>
-  </section>
-  <para>
-    <emphasis></emphasis> Clear All
-  </para>
-  <para>
-    <emphasis></emphasis> <emphasis></emphasis>
-  </para>
-  <para>
-    <emphasis></emphasis> Download PDF
-  </para>
-  <anchor xml:id="dropZone" />
-  <para>
-    <emphasis></emphasis>
-  </para>
-  <para>
-    Drag &amp; drop images here, or browse files
-  </para>
-  <para>
-    Supports JPG, PNG, WEBP, BMP, GIF, SVG (Up to 100MB batch)
-  </para>
-  <section xml:id="selected-images">
-    <title>Selected Images</title>
-    <anchor xml:id="imageCountBadge" />0
-  </section>
-  <para>
-    <emphasis></emphasis> Add More
-  </para>
-  <anchor xml:id="emptyState" />
-  <para>
-    <emphasis></emphasis>
-  </para>
-  <para>
-    No images added yet.
-  </para>
-  <para>
-    Upload images to customize, reorder, and convert into PDF.
-  </para>
-  <anchor xml:id="imageGrid" />
-  <para>
-    <emphasis></emphasis> PDF Settings
-  </para>
-  <para>
-    <emphasis></emphasis> Live PDF Preview
-  </para>
-  <anchor xml:id="panelSettings" />
-  <section xml:id="page-setup">
-    <title>Page Setup</title>
-    <para>
-      Orientation Auto (Match Image) Portrait Landscape
-    </para>
-    <para>
-      Page Size A4 (210 x 297 mm) US Letter Legal Executive Fit Image
-      Dimensions
-    </para>
-  </section>
-  <section xml:id="layout-positioning">
-    <title>Layout &amp; Positioning</title>
-    <para>
-      Grid Layout 1 Image per Page 2 Images per Page 4 Images per Page
-      (2x2 Grid)
-    </para>
-    <para>
-      Image Fit Contain (Keep Ratio) Crop Fill (Cover) Stretch to Fit
-    </para>
-    <para>
-      Margins None (0mm) Small (5mm) Medium (10mm) Large (20mm)
-    </para>
-    <para>
-      Alignment Center Top-Left
-    </para>
-  </section>
-  <section xml:id="header-footer">
-    <title>Header &amp; Footer</title>
-    <para>
-      Add Page Numbers (e.g. Page 1 of 5)
-    </para>
-    <para>
-      Header Text (Optional)
-    </para>
-    <para>
-      Page Background
-    </para>
-    <para>
-      Quality / Compression Original (High) Medium Compression Low
-      Quality (Small File)
-    </para>
-  </section>
-  <anchor xml:id="panelPreview" />
-  <para>
-    Live Preview
-  </para>
-  <para>
-    <emphasis></emphasis>
-  </para>
-  <para>
-    <anchor xml:id="previewPageIndicator" />Page 1 of 1
-  </para>
-  <para>
-    <emphasis></emphasis>
-  </para>
-  <anchor xml:id="cropModal" />
-  <section xml:id="crop-adjust-image">
-    <title>Crop &amp; Adjust Image</title>
-    <emphasis></emphasis>
-  </section>
-  <para>
-    <inlinemediaobject>
-      <imageobject>
-        <imagedata fileref="" id="cropImageTarget" role="max-w-full max-h-[50vh] object-contain" />
-      </imageobject>
-    </inlinemediaobject>
-  </para>
-  <para>
-    Free
-  </para>
-  <para>
-    1:1
-  </para>
-  <para>
-    4:3
-  </para>
-  <para>
-    16:9
-  </para>
-  <para>
-    Cancel
-  </para>
-  <para>
-    Apply Crop
-  </para>
-  <anchor xml:id="loadingOverlay" />
-  <para>
-    Processing PDF Generation...
-  </para>
-  </article>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image to PDF Converter</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- jsPDF Library CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Image to PDF Converter</h1>
+      <p>Convert your JPEG, PNG, or WebP images into a single PDF document instantly.</p>
+    </header>
+
+    <main>
+      <!-- Upload Zone -->
+      <div class="drop-zone" id="drop-zone">
+        <div class="drop-zone-content">
+          <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p class="drop-text">Drag & Drop images here or <span class="browse-btn">Browse</span></p>
+          <input type="file" id="file-input" accept="image/png, image/jpeg, image/webp" multiple hidden>
+        </div>
+      </div>
+
+      <!-- Controls & Customization -->
+      <div class="controls-panel" id="controls-panel" style="display: none;">
+        <div class="control-group">
+          <label for="page-orientation">Orientation:</label>
+          <select id="page-orientation">
+            <option value="portrait">Portrait</option>
+            <option value="landscape">Landscape</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="margin-select">Page Margin:</label>
+          <select id="margin-select">
+            <option value="none">No Margin</option>
+            <option value="small" selected>Small Margin</option>
+            <option value="big">Big Margin</option>
+          </select>
+        </div>
+
+        <div class="control-group button-group">
+          <button id="clear-all-btn" class="btn btn-secondary">Clear All</button>
+          <button id="convert-btn" class="btn btn-primary">Convert to PDF</button>
+        </div>
+      </div>
+
+      <!-- Preview Section -->
+      <div class="preview-container" id="preview-container"></div>
+    </main>
+
+    <footer>
+      <p>100% Free & Secure — All image processing is done locally in your browser.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
