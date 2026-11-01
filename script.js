@@ -1,131 +1,164 @@
-const { jsPDF } = window.jspdf;
-
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
-const controlsPanel = document.getElementById('controls-panel');
-const previewContainer = document.getElementById('preview-container');
-const convertBtn = document.getElementById('convert-btn');
-const clearAllBtn = document.getElementById('clear-all-btn');
-
 let imageFiles = [];
 
-// Drag and Drop event listeners
-dropZone.addEventListener('click', () => fileInput.click());
+// DOM Elements
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const previewGrid = document.getElementById('preview-grid');
+const controls = document.getElementById('controls');
+const actionSection = document.getElementById('action-section');
+const clearAllBtn = document.getElementById('clear-all-btn');
+const convertBtn = document.getElementById('convert-btn');
 
+// Drag and Drop Events
 dropZone.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  dropZone.classList.add('drag-over');
+    e.preventDefault();
+    dropZone.classList.add('dragover');
 });
 
 dropZone.addEventListener('dragleave', () => {
-  dropZone.classList.remove('drag-over');
+    dropZone.classList.remove('dragover');
 });
 
 dropZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  handleFiles(e.dataTransfer.files);
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
 });
 
+// File Input Change Event
 fileInput.addEventListener('change', (e) => {
-  handleFiles(e.target.files);
+    handleFiles(e.target.files);
 });
 
+// Process Selected Files
 function handleFiles(files) {
-  const validFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
-  
-  if (validFiles.length === 0) return;
+    const validTypes = ['image/png', 'image/jpeg', 'image/webp'];
+    
+    Array.from(files).forEach((file) => {
+        if (validTypes.includes(file.type)) {
+            imageFiles.push(file);
+        }
+    });
 
-  validFiles.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imageFiles.push({
-        id: Date.now() + Math.random(),
-        src: e.target.result
-      });
-      renderPreviews();
-    };
-    reader.readAsDataURL(file);
-  });
+    renderPreviews();
+    fileInput.value = ''; // Reset input
 }
 
+// Render Preview Grid
 function renderPreviews() {
-  previewContainer.innerHTML = '';
-  
-  if (imageFiles.length > 0) {
-    controlsPanel.style.display = 'flex';
-  } else {
-    controlsPanel.style.display = 'none';
-  }
+    previewGrid.innerHTML = '';
 
-  imageFiles.forEach((item, index) => {
-    const card = document.createElement('div');
-    card.className = 'preview-card';
-    
-    card.innerHTML = `
-      <img src="${item.src}" alt="Uploaded image ${index + 1}">
-      <button class="delete-btn" onclick="removeImage(${index})">&times;</button>
-    `;
-    
-    previewContainer.appendChild(card);
-  });
+    if (imageFiles.length === 0) {
+        controls.style.display = 'none';
+        actionSection.style.display = 'none';
+        return;
+    }
+
+    controls.style.display = 'flex';
+    actionSection.style.display = 'block';
+
+    imageFiles.forEach((file, index) => {
+        const card = document.createElement('div');
+        card.classList.add('preview-card');
+
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('remove-btn');
+        removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        removeBtn.onclick = () => removeImage(index);
+
+        card.appendChild(img);
+        card.appendChild(removeBtn);
+        previewGrid.appendChild(card);
+    });
 }
 
+// Remove Single Image
 function removeImage(index) {
-  imageFiles.splice(index, 1);
-  renderPreviews();
+    imageFiles.splice(index, 1);
+    renderPreviews();
 }
 
+// Clear All Images
 clearAllBtn.addEventListener('click', () => {
-  imageFiles = [];
-  fileInput.value = '';
-  renderPreviews();
+    imageFiles = [];
+    renderPreviews();
 });
 
-// PDF Generation
-convertBtn.addEventListener('click', () => {
-  if (imageFiles.length === 0) return;
+// Convert Images to PDF
+convertBtn.addEventListener('click', async () => {
+    if (imageFiles.length === 0) return;
 
-  const orientation = document.getElementById('page-orientation').value;
-  const marginOption = document.getElementById('margin-select').value;
+    convertBtn.disabled = true;
+    convertBtn.innerText = 'Generating PDF...';
 
-  const pdf = new jsPDF({
-    orientation: orientation,
-    unit: 'mm',
-    format: 'a4'
-  });
+    const { jsPDF } = window.jspdf;
+    const orientation = document.getElementById('page-orientation').value;
+    const margin = parseFloat(document.getElementById('page-margin').value) || 0;
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
+    const doc = new jsPDF({
+        orientation: orientation,
+        unit: 'mm',
+        format: 'a4'
+    });
 
-  let margin = 0;
-  if (marginOption === 'small') margin = 10;
-  if (marginOption === 'big') margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
 
-  const availableWidth = pageWidth - margin * 2;
-  const availableHeight = pageHeight - margin * 2;
+    for (let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+        const imgData = await getBase64(file);
+        const imgProps = await getImageDimensions(imgData);
 
-  imageFiles.forEach((imgObj, index) => {
-    if (index > 0) pdf.addPage();
+        if (i > 0) {
+            doc.addPage();
+        }
 
-    const img = new Image();
-    img.src = imgObj.src;
+        // Calculate proportions to fit within margins
+        const availableWidth = pageWidth - (margin * 2);
+        const availableHeight = pageHeight - (margin * 2);
 
-    // Calculate dimensions to maintain aspect ratio
-    let imgWidth = img.width;
-    let imgHeight = img.height;
-    
-    const ratio = Math.min(availableWidth / imgWidth, availableHeight / imgHeight);
-    
-    const finalWidth = imgWidth * ratio;
-    const finalHeight = imgHeight * ratio;
+        let imgWidth = availableWidth;
+        let imgHeight = (imgProps.height * availableWidth) / imgProps.width;
 
-    // Center image on the page
-    const x = margin + (availableWidth - finalWidth) / 2;
-    const y = margin + (availableHeight - finalHeight) / 2;
+        if (imgHeight > availableHeight) {
+            imgHeight = availableHeight;
+            imgWidth = (imgProps.width * availableHeight) / imgProps.height;
+        }
 
-    pdf.addImage(imgObj.src, 'JPEG', x, y, finalWidth, finalHeight);
-  });
+        // Center image on the page
+        const xPos = margin + (availableWidth - imgWidth) / 2;
+        const yPos = margin + (availableHeight - imgHeight) / 2;
 
-  pdf.save('converted-images.pdf');
+        const format = file.type === 'image/png' ? 'PNG' : 'JPEG';
+        doc.addImage(imgData, format, xPos, yPos, imgWidth, imgHeight);
+    }
+
+    doc.save('converted-images.pdf');
+
+    convertBtn.disabled = false;
+    convertBtn.innerHTML = '<i class="fa-solid fa-download"></i> Convert & Download PDF';
 });
+
+// Helper: Convert File to Base64 Data URL
+function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+    });
+}
+
+// Helper: Get Image Dimensions
+function getImageDimensions(src) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+            resolve({ width: img.width, height: img.height });
+        };
+    });
+}
