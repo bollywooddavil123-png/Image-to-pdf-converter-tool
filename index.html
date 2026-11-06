@@ -1,58 +1,265 @@
+<!-- ==========================================
+     FILENAME: index.html
+     Image to PDF Converter - Smart PDF Maker
+     ========================================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image to PDF Converter</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- jsPDF Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart PDF Maker - Fast & Secure Image to PDF Converter</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- External CSS File -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Third Party Libraries -->
+  <!-- jsPDF for client-side PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- JSZip for batch exporting multiple individual PDFs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fa-solid fa-file-pdf"></i> Image to PDF Converter</h1>
-            <p>Convert your images into a single PDF document effortlessly.</p>
-        </header>
 
-        <!-- Upload Drop Zone -->
-        <div class="upload-area" id="drop-zone">
-            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-            <h3>Drag & Drop Images Here</h3>
-            <p>or</p>
-            <label for="file-input" class="btn btn-select">Select Images</label>
-            <input type="file" id="file-input" accept="image/png, image/jpeg, image/webp" multiple hidden>
-        </div>
-
-        <!-- Controls Section -->
-        <div class="controls-section" id="controls" style="display: none;">
-            <div class="control-group">
-                <label for="page-orientation">Orientation:</label>
-                <select id="page-orientation">
-                    <option value="portrait">Portrait</option>
-                    <option value="landscape">Landscape</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label for="page-margin">Margin (mm):</label>
-                <input type="number" id="page-margin" min="0" max="50" value="10">
-            </div>
-            <button class="btn btn-clear" id="clear-all-btn"><i class="fa-solid fa-trash"></i> Clear All</button>
-        </div>
-
-        <!-- Image Preview Grid -->
-        <div class="preview-grid" id="preview-grid"></div>
-
-        <!-- Action Section -->
-        <div class="action-section" id="action-section" style="display: none;">
-            <button class="btn btn-convert" id="convert-btn">
-                <i class="fa-solid fa-download"></i> Convert & Download PDF
-            </button>
-        </div>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <div class="logo-icon"><i class="fa-solid fa-file-pdf"></i></div>
+        <span class="logo-text">Smart<span>PDF</span></span>
+      </div>
+      <div class="nav-actions">
+        <button id="themeToggle" class="icon-btn" title="Toggle Theme" aria-label="Toggle Dark/Light Theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
     </div>
+  </nav>
 
-    <script src="script.js"></script>
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Hero Section -->
+    <header class="hero">
+      <h1 class="hero-title">Convert Images to PDF <span class="gradient-text">Instantly</span></h1>
+      <p class="hero-subtitle">Fast, secure, and 100% free client-side conversion. Your images never leave your device.</p>
+    </header>
+
+    <!-- App Grid Layout -->
+    <div class="app-layout">
+      
+      <!-- Left Column: Upload & Gallery -->
+      <section class="left-col">
+        <!-- Upload Dropzone Card -->
+        <div class="card upload-card">
+          <div id="dropzone" class="dropzone">
+            <input type="file" id="fileInput" accept="image/jpeg, image/png, image/webp" multiple hidden>
+            <div class="dropzone-content">
+              <div class="upload-icon-wrapper">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <h3>Drag & Drop images here</h3>
+              <p>or browse files from your computer or mobile device</p>
+              <div class="file-badges">
+                <span class="badge">JPG</span>
+                <span class="badge">PNG</span>
+                <span class="badge">WEBP</span>
+              </div>
+              <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-plus"></i> Select Images
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Gallery Controls & Items -->
+        <div id="gallerySection" class="card gallery-card hidden">
+          <div class="gallery-header">
+            <div class="gallery-title">
+              <h3>Selected Images (<span id="imageCount">0</span>)</h3>
+              <span id="totalSize" class="size-badge">0 MB</span>
+            </div>
+            <div class="gallery-actions">
+              <button class="btn btn-sm btn-secondary" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-plus"></i> Add More
+              </button>
+              <button class="btn btn-sm btn-danger-outline" id="clearAllBtn">
+                <i class="fa-solid fa-trash-can"></i> Clear All
+              </button>
+            </div>
+          </div>
+
+          <div id="imageGrid" class="image-grid"></div>
+        </div>
+      </section>
+
+      <!-- Right Column: PDF Customization Settings -->
+      <section class="right-col">
+        <div class="card settings-card">
+          <h2 class="settings-title"><i class="fa-solid fa-sliders"></i> PDF Settings</h2>
+          
+          <form id="settingsForm" onsubmit="return false;">
+            <!-- Filename Input -->
+            <div class="form-group">
+              <label for="filenameInput">Output Filename</label>
+              <div class="input-with-suffix">
+                <input type="text" id="filenameInput" value="Converted_Document" placeholder="Enter file name">
+                <span class="suffix">.pdf</span>
+              </div>
+            </div>
+
+            <!-- Page Orientation -->
+            <div class="form-group">
+              <label>Page Orientation</label>
+              <div class="segmented-control">
+                <input type="radio" name="orientation" id="orientAuto" value="auto" checked>
+                <label for="orientAuto">Auto</label>
+                
+                <input type="radio" name="orientation" id="orientPortrait" value="portrait">
+                <label for="orientPortrait">Portrait</label>
+                
+                <input type="radio" name="orientation" id="orientLandscape" value="landscape">
+                <label for="orientLandscape">Landscape</label>
+              </div>
+            </div>
+
+            <!-- Page Size -->
+            <div class="form-group">
+              <label for="pageSizeSelect">Page Size</label>
+              <select id="pageSizeSelect" class="form-control">
+                <option value="a4" selected>A4 (210 x 297 mm)</option>
+                <option value="letter">US Letter (8.5 x 11 in)</option>
+                <option value="legal">Legal (8.5 x 14 in)</option>
+                <option value="a3">A3 (297 x 420 mm)</option>
+                <option value="fit">Fit to Image Size</option>
+              </select>
+            </div>
+
+            <!-- Margins -->
+            <div class="form-group">
+              <label>Page Margins</label>
+              <div class="segmented-control">
+                <input type="radio" name="margin" id="marginNone" value="0" checked>
+                <label for="marginNone">None</label>
+                
+                <input type="radio" name="margin" id="marginSmall" value="5">
+                <label for="marginSmall">Small</label>
+                
+                <input type="radio" name="margin" id="marginMedium" value="12">
+                <label for="marginMedium">Medium</label>
+                
+                <input type="radio" name="margin" id="marginLarge" value="20">
+                <label for="marginLarge">Large</label>
+              </div>
+            </div>
+
+            <!-- Image Quality slider -->
+            <div class="form-group">
+              <div class="label-with-value">
+                <label for="qualityRange">Image Quality / Compression</label>
+                <span id="qualityVal" class="val-tag">85% (High)</span>
+              </div>
+              <input type="range" id="qualityRange" min="20" max="100" value="85" class="slider">
+              <div class="slider-labels">
+                <span>Smaller Size</span>
+                <span>Best Quality</span>
+              </div>
+            </div>
+
+            <!-- Output Mode (Single PDF or Zipped Separate PDFs) -->
+            <div class="form-group">
+              <label for="outputModeSelect">Output Mode</label>
+              <select id="outputModeSelect" class="form-control">
+                <option value="single" selected>Single PDF (Combine All Images)</option>
+                <option value="multiple">Separate PDFs (Zip Package)</option>
+              </select>
+            </div>
+
+            <!-- Conversion Action Button -->
+            <button id="convertBtn" class="btn btn-primary btn-block btn-lg" disabled>
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Convert to PDF
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Progress Modal / Bar Overlay -->
+  <div id="progressModal" class="modal-overlay hidden">
+    <div class="modal-card progress-card">
+      <div class="spinner-wrapper">
+        <div class="spinner"></div>
+      </div>
+      <h3 id="progressTitle">Converting Images...</h3>
+      <div class="progress-bar-bg">
+        <div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div>
+      </div>
+      <p id="progressStatus" class="progress-status-text">Processing image 1 of 5...</p>
+    </div>
+  </div>
+
+  <!-- PDF Result / Preview Modal -->
+  <div id="resultModal" class="modal-overlay hidden">
+    <div class="modal-card result-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-circle-check success-icon"></i>
+          <div>
+            <h3>PDF Ready for Download!</h3>
+            <p id="resultDetails" class="subtitle">Filename: Converted_Document.pdf</p>
+          </div>
+        </div>
+        <button class="icon-btn close-modal" id="closeResultModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <iframe id="pdfPreviewFrame" src="about:blank"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button id="modalResetBtn" class="btn btn-secondary">Convert Another</button>
+        <button id="modalDownloadBtn" class="btn btn-primary"><i class="fa-solid fa-download"></i> Download PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Policy Modal -->
+  <div id="privacyModal" class="modal-overlay hidden">
+    <div class="modal-card privacy-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-shield-halved"></i> Privacy & Security Guarantee</h3>
+        <button class="icon-btn close-modal" id="closePrivacyModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body text-content">
+        <p><strong>100% Client-Side Processing</strong></p>
+        <p> Smart PDF Maker operates entirely inside your web browser using modern WebAssembly and JavaScript engines. Your uploaded images and generated PDFs are <strong>NEVER uploaded to any external server</strong> or remote database.</p>
+        <p><strong>Zero Data Retention</strong></p>
+        <p>All processed image data, thumbnail caches, and memory instances are automatically cleared as soon as you reset the application or close your browser tab.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p>&copy; 2026 Smart PDF Maker. Built with client-side privacy in mind.</p>
+      <div class="footer-links">
+        <a href="#" id="privacyLink">Privacy Policy</a>
+        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- External JS File -->
+  <script src="script.js"></script>
 </body>
 </html>
